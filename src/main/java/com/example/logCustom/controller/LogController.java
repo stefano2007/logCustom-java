@@ -1,5 +1,6 @@
 package com.example.logCustom.controller;
 
+import com.example.logCustom.util.CompletableFutureUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,24 +27,17 @@ public class LogController {
         MDC.put("correlationId", UUID.randomUUID().toString());
         MDC.put("idJornada", valor);
 
-        // Capturar o contexto MDC
-        var mdcContext = MDC.getCopyOfContextMap();
-
         logger.log(Level.INFO, "Log antes da chamada assincronas.");
 
         // Primeira chamada concorrente
-        CompletableFuture<String> future1 = CompletableFuture.supplyAsync(() -> {
-            if (mdcContext != null) MDC.setContextMap(mdcContext);
-
+        CompletableFuture<String> future1 = CompletableFutureUtil.supplyCustomizado(() -> {
             // Logica da primeira operação
             logger.log(Level.INFO, "future1 log.");
             return "Resultado da Operação 1";
         });
 
         // Segunda chamada concorrente
-        CompletableFuture<String> future2 = CompletableFuture.supplyAsync(() -> {
-            if (mdcContext != null) MDC.setContextMap(mdcContext);
-
+        CompletableFuture<String> future2 = CompletableFutureUtil.supplyCustomizado(() -> {
             // Logica da segunda operação
             logger.log(Level.INFO, "future2 log.");
             return "Resultado da Operação 2";
